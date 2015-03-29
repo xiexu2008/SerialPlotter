@@ -5,4 +5,4 @@ python PlotSerialPort.py --port /dev/tty.usbmodem1411 --dimension 3
 
 Also make sure the serial data is formated in this way "X1,X2,...,Xk\n", where k is the dimension, the X1 to Xk are the dimension data, and the \n is the newline indicating the end of the data.
 
-The scriplt also contains a function "TestAnimationWithFakeStream". It allows you to see how the plotting goes without a real seral COM port.
+The scriplt also has a function "TestAnimationWithFakeStream". It allows you to see how the plotting goes without a real seral COM port.
