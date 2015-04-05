@@ -80,7 +80,7 @@ class Animator:
 
         # set up animation
         self.fig = plt.figure()
-        self.ax = plt.axes(xlim=(0, 200), ylim=(0, 100))
+        self.ax = plt.axes(xlim=(0, 200), ylim=(-500, 500))
         self.plots = [self.ax.plot([], [])[0] for i in range(self.numOfPlots)]
 
 
