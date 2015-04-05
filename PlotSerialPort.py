@@ -25,6 +25,7 @@ import time
 from collections import deque
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import re
 
 
 class PlotDataProducer:
@@ -46,7 +47,7 @@ class PlotDataProducer:
                 self.bufferSyncCondition.notify()
                 self.bufferSyncCondition.release()
                 line = ""
-                time.sleep(0.05)
+                time.sleep(0.01)
 
 
 class PlotDataConsumer:
@@ -79,12 +80,12 @@ class Animator:
 
         # set up animation
         self.fig = plt.figure()
-        self.ax = plt.axes(xlim=(0, 200), ylim=(-500, 500))
+        self.ax = plt.axes(xlim=(0, 200), ylim=(0, 100))
         self.plots = [self.ax.plot([], [])[0] for i in range(self.numOfPlots)]
 
 
     def Animate(self):
-        anim = animation.FuncAnimation(self.fig, self.UpdatePlotData, interval=25)
+        anim = animation.FuncAnimation(self.fig, self.UpdatePlotData, interval=10)
         plt.show()
 
 
@@ -92,7 +93,7 @@ class Animator:
         try:
             dataStr = self.plotDataSource.GetPlotData()
             print dataStr
-            plotData = [float(val) for val in dataStr.split(",") if val.isdigit()]
+            plotData = [float(val) for val in dataStr.split(",") if re.match(r'[+-]?(\d+(\.\d*)?|\.\d+)', val, re.DOTALL)]
             if len(plotData) == self.numOfPlots:
                 self.AddToPlotBuffer(plotData)
                 for i in range(self.numOfPlots):
@@ -132,6 +133,7 @@ def AnimateSerialPort(serialPort, dataDimension):
 
     baudRate = 9600
     ser = serial.Serial(serialPort, baudRate)
+    ser.read(ser.inWaiting())   # empty the receiving buffer
     DoAnimation(ser, dataDimension)
 
     if ser:
