@@ -47,7 +47,7 @@ class PlotDataProducer:
                 self.bufferSyncCondition.notify()
                 self.bufferSyncCondition.release()
                 line = ""
-                time.sleep(0.01)
+                time.sleep(0.01)  # 10 ms
 
 
 class PlotDataConsumer:
@@ -76,16 +76,16 @@ class Animator:
         self.numOfPlots = numOfPlots
         self.maxLengthOfPlotBuffer = maxLengthOfPlotBuffer
         # make a list of queues and initialize it with 0.0
-        self.dataBufferByPlot = [deque([0.0]*self.maxLengthOfPlotBuffer) for i in range(self.numOfPlots)]
+        self.dataBufferByPlot = [deque([0.0]*self.maxLengthOfPlotBuffer, maxlen=maxLengthOfPlotBuffer) for i in range(self.numOfPlots)]
 
         # set up animation
         self.fig = plt.figure()
-        self.ax = plt.axes(xlim=(0, 200), ylim=(-500, 500))
+        self.ax = plt.axes(xlim=(0, maxLengthOfPlotBuffer), ylim=(-500, 500))
         self.plots = [self.ax.plot([], [])[0] for i in range(self.numOfPlots)]
 
 
     def Animate(self):
-        anim = animation.FuncAnimation(self.fig, self.UpdatePlotData, interval=10)
+        anim = animation.FuncAnimation(self.fig, self.UpdatePlotData, interval=10)  # interval unit: ms
         plt.show()
 
 
@@ -107,11 +107,7 @@ class Animator:
 
     def AddToPlotBuffer(self, plotData):
         for i in range(len(plotData)):
-            if len(self.dataBufferByPlot[i]) < self.maxLengthOfPlotBuffer:
-                self.dataBufferByPlot[i].append(plotData[i])
-            else:
-                self.dataBufferByPlot[i].pop()
-                self.dataBufferByPlot[i].appendleft(plotData[i])
+            self.dataBufferByPlot[i].appendleft(plotData[i])
 
 
 def DoAnimation(sourceDataStream, sourceDataDimension):
@@ -154,7 +150,7 @@ class TestDataInStream:
         return "".join([self.buffer.popleft() for i in range(numOfCharsToRead)])
 
     def MakeDigits(self):
-        line = ",".join([str(random.randint(0,256)) for i in range(self.dataDimensions)]) + "\n"
+        line = ",".join([str(random.randint(-256, 256)) for i in range(self.dataDimensions)]) + "\n"
         for ch in line:
             self.buffer.append(ch)
         return line
